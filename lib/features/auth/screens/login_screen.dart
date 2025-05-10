@@ -1,14 +1,19 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pinterest_clone/features/auth/controller/auth_controller.dart';
 import 'package:pinterest_clone/features/auth/widgets/login_button.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
+  String? _email;
+  String? _password;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,18 +41,30 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(
               height: 20,
             ),
-            const LoginButton(
-              'Facebook',
-              Color(0xfF3B5998),
-            ),
+            LoginButton(
+                'Facebook',
+                Color(0xfF3B5998),
+                (context) => ref
+                    .read(authControllerProvider.notifier)
+                    .facebookSignIn(context)),
             const SizedBox(
               height: 5,
             ),
-            const LoginButton('Google', Color(0xff4285F4)),
+            LoginButton(
+                'Google',
+                const Color(0xff4285F4),
+                (context) => ref
+                    .read(authControllerProvider.notifier)
+                    .googleSignIn(context)),
             const SizedBox(
               height: 5,
             ),
-            const LoginButton('Apple', Colors.white),
+            LoginButton(
+                'Apple',
+                Colors.white,
+                (context) => ref
+                    .read(authControllerProvider.notifier)
+                    .appleSignIn(context)),
             const SizedBox(
               height: 20,
             ),
@@ -68,6 +85,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 Container(
                   margin: const EdgeInsets.all(20),
                   child: TextFormField(
+                    validator: (val) {
+                      if (val!.isEmpty ||
+                          val.trim().isEmpty ||
+                          !EmailValidator.validate(val)) return 'Invalid Email';
+                      return null;
+                    },
+                    onSaved: (val) {
+                      _email = val;
+                    },
                     decoration: InputDecoration(
                         labelText: 'Email',
                         hintText: 'Enter your email',
@@ -82,6 +108,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 Container(
                   margin: const EdgeInsets.all(20),
                   child: TextFormField(
+                    validator: (val) {
+                      if (val == null || val.trim().isEmpty || val.length < 8) {
+                        return 'Invalid Password';
+                      }
+                      return null;
+                    },
+                    onSaved: (val) {
+                      _password = val;
+                    },
                     decoration: InputDecoration(
                         labelText: 'Password',
                         hintText: 'Enter your password',
@@ -103,7 +138,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           backgroundColor: WidgetStatePropertyAll(
                         Color(0xffE60023),
                       )),
-                      onPressed: () {},
+                      onPressed: () {
+                        ref
+                            .read(authControllerProvider.notifier)
+                            .loginWithEmail(context, _email!, _password!);
+                      },
                       child: const Text(
                         'Log in',
                         style: TextStyle(
