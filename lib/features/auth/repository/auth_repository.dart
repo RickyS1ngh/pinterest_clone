@@ -71,7 +71,18 @@ class AuthRepository {
 
   UserModel loadCachedUser() {
     final userBox = Hive.box('user');
+
     return userBox.get('user');
+  }
+
+  bool isCachedUser() {
+    final userBox = Hive.box('user');
+
+    if (userBox.containsKey('user')) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   Future<UserModel> getUser(String id) {

@@ -31,7 +31,13 @@ class AuthController extends StateNotifier<UserModel> {
       BuildContext contex, String email, String password) async {}
 
   void loadCachedUser() {
-    _ref.read(currentUserProvider.notifier).state =
-        _authRepository.loadCachedUser();
+    if (_ref.read(currentUserProvider.notifier).state == null) {
+      _ref.read(currentUserProvider.notifier).state =
+          _authRepository.loadCachedUser();
+    }
+  }
+
+  bool isCachedUser() {
+    return _authRepository.isCachedUser();
   }
 }
