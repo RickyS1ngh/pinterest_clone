@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:pinterest_clone/features/auth/screens/login_screen.dart';
+import 'package:pinterest_clone/features/auth/screens/sign_up_screen.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -79,7 +80,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     precacheImage(_pinterestLogo.image, context);
   }
 
-  void login() {
+  void _login() {
     showModalBottomSheet(
       isScrollControlled: true,
       context: context,
@@ -88,6 +89,15 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         child: const LoginScreen(),
       ),
     );
+  }
+
+  void _signUp() {
+    showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (ctx) => const SizedBox(
+              child: SignUpScreen(),
+            ));
   }
 
   @override
@@ -146,7 +156,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         Color(0xffE60023),
                       ),
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      _signUp();
+                    },
                     child: const Text(
                       'Sign up',
                       style: TextStyle(color: Colors.white),
@@ -160,7 +172,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               style: const ButtonStyle(
                   backgroundColor: WidgetStatePropertyAll(Colors.grey)),
               onPressed: () {
-                login();
+                _login();
               },
               child: const Text(
                 'Login',

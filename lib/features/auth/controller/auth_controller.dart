@@ -19,19 +19,41 @@ class AuthController extends StateNotifier<UserModel> {
   final AuthRepository _authRepository;
   final Ref _ref;
 
-  Future<void> googleSignIn(BuildContext context) async {
+  Future<bool> googleSignIn(BuildContext context) async {
     final user = await _authRepository.googleSignIn();
-    user.fold((l) => showSnackBar(context, l.errorMessage),
-        (user) => _ref.read(currentUserProvider.notifier).state = user);
+    return user.fold((l) {
+      showSnackBar(context, l.errorMessage);
+      return false;
+    }, (user) {
+      _ref.read(currentUserProvider.notifier).state = user;
+      return true;
+    });
+  }
+
+  Future<bool> signUpWithEmail(
+      BuildContext context, String email, String password) async {
+    final user = await _authRepository.signUpWithEmail(email, password);
+    return user.fold((l) {
+      showSnackBar(context, l.errorMessage);
+      return false;
+    }, (user) {
+      _ref.read(currentUserProvider.notifier).state = user;
+      return true;
+    });
   }
 
   Future<void> facebookSignIn(BuildContext context) async {}
   Future<void> appleSignIn(BuildContext context) async {}
-  Future<void> loginWithEmail(
+  Future<bool> loginWithEmail(
       BuildContext context, String email, String password) async {
     final user = await _authRepository.loginWithEmail(email, password);
-    user.fold((l) => showSnackBar(context, l.errorMessage),
-        (user) => _ref.read(currentUserProvider.notifier).state = user);
+    return user.fold((l) {
+      showSnackBar(context, l.errorMessage);
+      return false;
+    }, (user) {
+      _ref.read(currentUserProvider.notifier).state = user;
+      return true;
+    });
   }
 
   void loadCachedUser() {

@@ -55,6 +55,24 @@ class AuthRepository {
     }
   }
 
+  EitherUser<UserModel> signUpWithEmail(String email, String password) async {
+    try {
+      final userBox = Hive.box('user');
+      final userCredential = await _auth.createUserWithEmailAndPassword(
+          email: email, password: password);
+
+      UserModel user = UserModel(email: email, uid: userCredential.user!.uid);
+      await _firestore
+          .collection('Users')
+          .doc(userCredential.user!.uid)
+          .set(user.toMap());
+      userBox.put('user', user);
+      return right(userBox.get('user'));
+    } on FirebaseAuthException catch (error) {
+      return left(Failure(error.message!));
+    }
+  }
+
   EitherUser<UserModel> loginWithEmail(String email, String password) async {
     try {
       final userBox = Hive.box('user');

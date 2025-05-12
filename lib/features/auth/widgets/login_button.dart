@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pinterest_clone/core/utils.dart';
 import 'package:pinterest_clone/features/home/screens/home_screen.dart';
 import 'package:pinterest_clone/features/splash/screens/splash_screen.dart';
 import 'package:pinterest_clone/features/tab_bar/screen/tab_screen.dart';

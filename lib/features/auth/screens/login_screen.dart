@@ -28,13 +28,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           _isLoggingIn = true;
         });
 
-        await ref
+        bool status = await ref
             .read(authControllerProvider.notifier)
             .loginWithEmail(context, _email!, _password!);
-
-        Navigator.of(context).pushAndRemoveUntil(
-            PageRouteBuilder(pageBuilder: (_, __, ___) => const TabScreen()),
-            (route) => false);
+        setState(() {
+          _isLoggingIn = false;
+        });
+        if (status) {
+          Navigator.of(context).pushAndRemoveUntil(
+              PageRouteBuilder(pageBuilder: (_, __, ___) => const TabScreen()),
+              (route) => false);
+        }
       } catch (error) {
         showSnackBar(context, error.toString());
       }
