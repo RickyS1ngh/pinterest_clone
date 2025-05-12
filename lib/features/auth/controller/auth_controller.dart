@@ -28,7 +28,11 @@ class AuthController extends StateNotifier<UserModel> {
   Future<void> facebookSignIn(BuildContext context) async {}
   Future<void> appleSignIn(BuildContext context) async {}
   Future<void> loginWithEmail(
-      BuildContext contex, String email, String password) async {}
+      BuildContext context, String email, String password) async {
+    final user = await _authRepository.loginWithEmail(email, password);
+    user.fold((l) => showSnackBar(context, l.errorMessage),
+        (user) => _ref.read(currentUserProvider.notifier).state = user);
+  }
 
   void loadCachedUser() {
     if (_ref.read(currentUserProvider.notifier).state == null) {

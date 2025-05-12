@@ -1,8 +1,11 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pinterest_clone/core/utils.dart';
 import 'package:pinterest_clone/features/auth/controller/auth_controller.dart';
 import 'package:pinterest_clone/features/auth/widgets/login_button.dart';
+import 'package:pinterest_clone/features/home/screens/home_screen.dart';
+import 'package:pinterest_clone/features/tab_bar/screen/tab_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -14,6 +17,30 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   String? _email;
   String? _password;
+  bool _isLoggingIn = false;
+  final _formKey = GlobalKey<FormState>();
+
+  void _login() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        _formKey.currentState!.save();
+        setState(() {
+          _isLoggingIn = true;
+        });
+
+        await ref
+            .read(authControllerProvider.notifier)
+            .loginWithEmail(context, _email!, _password!);
+
+        Navigator.of(context).pushAndRemoveUntil(
+            PageRouteBuilder(pageBuilder: (_, __, ___) => const TabScreen()),
+            (route) => false);
+      } catch (error) {
+        showSnackBar(context, error.toString());
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,15 +62,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               fontWeight: FontWeight.bold),
         ),
       ),
-      body: Center(
+      body: SingleChildScrollView(
         child: Column(
+          mainAxisSize: MainAxisSize.max,
           children: [
             const SizedBox(
               height: 20,
             ),
             LoginButton(
                 'Facebook',
-                Color(0xfF3B5998),
+                const Color(0xfF3B5998),
                 (context) => ref
                     .read(authControllerProvider.notifier)
                     .facebookSignIn(context)),
@@ -80,90 +108,100 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               height: 10,
             ),
             Form(
+                key: _formKey,
                 child: Column(
-              children: [
-                Container(
-                  margin: const EdgeInsets.all(20),
-                  child: TextFormField(
-                    validator: (val) {
-                      if (val!.isEmpty ||
-                          val.trim().isEmpty ||
-                          !EmailValidator.validate(val)) return 'Invalid Email';
-                      return null;
-                    },
-                    onSaved: (val) {
-                      _email = val;
-                    },
-                    decoration: InputDecoration(
-                        labelText: 'Email',
-                        hintText: 'Enter your email',
-                        focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.white),
-                            borderRadius: BorderRadius.circular(10)),
-                        enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.white),
-                            borderRadius: BorderRadius.circular(10))),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(20),
-                  child: TextFormField(
-                    validator: (val) {
-                      if (val == null || val.trim().isEmpty || val.length < 8) {
-                        return 'Invalid Password';
-                      }
-                      return null;
-                    },
-                    onSaved: (val) {
-                      _password = val;
-                    },
-                    decoration: InputDecoration(
-                        labelText: 'Password',
-                        hintText: 'Enter your password',
-                        focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.white),
-                            borderRadius: BorderRadius.circular(20)),
-                        enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.white),
-                            borderRadius: BorderRadius.circular(10))),
-                  ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * .95,
-                  child: ElevatedButton(
-                      style: const ButtonStyle(
-                          backgroundColor: WidgetStatePropertyAll(
-                        Color(0xffE60023),
-                      )),
-                      onPressed: () {
-                        ref
-                            .read(authControllerProvider.notifier)
-                            .loginWithEmail(context, _email!, _password!);
-                      },
-                      child: const Text(
-                        'Log in',
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                      )),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      'Forgot your password?',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold),
-                    ))
-              ],
-            ))
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.all(20),
+                      child: TextFormField(
+                        validator: (val) {
+                          if (val!.isEmpty ||
+                              val.trim().isEmpty ||
+                              !EmailValidator.validate(val)) {
+                            return 'Invalid Email';
+                          }
+                          return null;
+                        },
+                        onSaved: (val) {
+                          _email = val;
+                        },
+                        decoration: InputDecoration(
+                            labelText: 'Email',
+                            hintText: 'Enter your email',
+                            focusedBorder: OutlineInputBorder(
+                                borderSide:
+                                    const BorderSide(color: Colors.white),
+                                borderRadius: BorderRadius.circular(10)),
+                            enabledBorder: OutlineInputBorder(
+                                borderSide:
+                                    const BorderSide(color: Colors.white),
+                                borderRadius: BorderRadius.circular(10))),
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.all(20),
+                      child: TextFormField(
+                        obscureText: true,
+                        validator: (val) {
+                          if (val == null ||
+                              val.trim().isEmpty ||
+                              val.length < 8) {
+                            return 'Invalid Password';
+                          }
+                          return null;
+                        },
+                        onSaved: (val) {
+                          _password = val;
+                        },
+                        decoration: InputDecoration(
+                            labelText: 'Password',
+                            hintText: 'Enter your password',
+                            focusedBorder: OutlineInputBorder(
+                                borderSide:
+                                    const BorderSide(color: Colors.white),
+                                borderRadius: BorderRadius.circular(10)),
+                            enabledBorder: OutlineInputBorder(
+                                borderSide:
+                                    const BorderSide(color: Colors.white),
+                                borderRadius: BorderRadius.circular(10))),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * .95,
+                      child: ElevatedButton(
+                          style: const ButtonStyle(
+                              backgroundColor: WidgetStatePropertyAll(
+                            Color(0xffE60023),
+                          )),
+                          onPressed: () {
+                            _login();
+                          },
+                          child: _isLoggingIn
+                              ? const CircularProgressIndicator()
+                              : const Text(
+                                  'Log in',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                )),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    TextButton(
+                        onPressed: () {},
+                        child: const Text(
+                          'Forgot your password?',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold),
+                        ))
+                  ],
+                )),
           ],
         ),
       ),
